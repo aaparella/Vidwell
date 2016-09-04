@@ -23,7 +23,10 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go videos.UploadVideo(data, handler.Header.Get("Content-Type"))
+	go videos.StoreVideo(data,
+		handler.Header.Get("Content-Type"),
+		"testing",
+		"aaparella")
 
 	fmt.Fprintf(w, "Thank you for the video!")
 }
