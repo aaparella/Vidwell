@@ -13,6 +13,7 @@ import (
 	"github.com/aaparella/vidwell/models"
 	"github.com/aaparella/vidwell/storage"
 	"github.com/aaparella/vidwell/videos"
+	"github.com/gorilla/mux"
 )
 
 func Upload(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +76,7 @@ func main() {
 	}()
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGKILL)
 
-	http.HandleFunc("/upload", Upload)
-	http.HandleFunc("/videos", Videos)
-	http.ListenAndServe(":8080", nil)
+	router := mux.NewRouter()
+	RegisterRoutes(router)
+	http.ListenAndServe(":8080", router)
 }
