@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <title>Error!</title>
+    </head>
+
+    <body>
+        <h1>Error : {{ .Error }}</h1>
+
+        <p>There was an error when generating the page {{ .File }}</p>
+        <p>Data : </p>
+
+        <ul>
+            <li>Template Name : {{ .File }}</li>
+            <li>Error : {{ .Error }}</li>
+            <li>Data :  {{ .Data }}</li>
+        </ul>
+
+    </body>
+
+</html>

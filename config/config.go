@@ -16,11 +16,20 @@ type StorageConfiguration struct {
 	Database        string
 }
 
+// RenderingConfiguration specifies the directory template files
+// will be located in.
+type RenderingConfiguration struct {
+	TemplatesDir string
+}
+
 // Configuration encapsulates configuration of all submodules within the
 // application.
 type Configuration struct {
 	// Storage module configuration
 	Storage StorageConfiguration
+
+	// Rendering module configuration
+	Rendering RenderingConfiguration
 }
 
 var conf Configuration
@@ -35,4 +44,8 @@ func init() {
 
 func GetStorageConfiguration() StorageConfiguration {
 	return conf.Storage
+}
+
+func GetRenderingConfiguration() RenderingConfiguration {
+	return conf.Rendering
 }

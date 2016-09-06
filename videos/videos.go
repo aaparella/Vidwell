@@ -2,13 +2,13 @@ package videos
 
 import (
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 
 	"code.google.com/p/go-uuid/uuid"
 	"github.com/aaparella/vidwell/models"
 	"github.com/aaparella/vidwell/storage"
+	"github.com/aaparella/vidwell/views"
 	"github.com/gorilla/mux"
 )
 
@@ -39,15 +39,6 @@ func CreateVideoRecord(title, uuid, content string, userID uint) error {
 	}).Error
 }
 
-const VIDEO_PAGE = `
-	<html>
-		<div class="video">
-			<h1>{{ .Title }} {{ .Uuid }} {{ .ID }}</h1>
-		</div>
-	</html>
-`
-
-// ViewView displays the information about a video.
 func ViewVideo(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	var video models.Video
@@ -55,6 +46,14 @@ func ViewVideo(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Could not find video with ID: %s", id)
 		return
 	}
-	tmpl, _ := template.New("video").Parse(VIDEO_PAGE)
-	tmpl.Execute(w, video)
+	views.Render(w, "video", video)
+}
+
+func ViewVideos(w http.ResponseWriter, r *http.Request) {
+	var videos []models.Video
+	if err := storage.DB.Find(&videos).Error; err != nil {
+		fmt.Fprintf(w, "Could not find videos : %s", err.Error())
+		return
+	}
+	views.Render(w, "videos", videos)
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -10,7 +9,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/aaparella/vidwell/models"
 	"github.com/aaparella/vidwell/storage"
 	"github.com/aaparella/vidwell/videos"
 	"github.com/gorilla/mux"
@@ -37,25 +35,6 @@ func Upload(w http.ResponseWriter, r *http.Request) {
 		"aaparella")
 
 	fmt.Fprintf(w, "Thank you for the video!")
-}
-
-const VIDEOS_HTML = `
-	{{ range . }}
-		<div class="video"> 
-			<h1>{{ .Title }} {{ .Uuid }}</h1>
-		</div>
-	{{ end }}
-`
-
-func Videos(w http.ResponseWriter, r *http.Request) {
-	var videos []models.Video
-	if err := storage.DB.Find(&videos).Error; err != nil {
-		fmt.Fprintf(w, "Could not find videos : %s", err.Error())
-		return
-	}
-
-	tmpl, _ := template.New("test").Parse(VIDEOS_HTML)
-	tmpl.Execute(w, videos)
 }
 
 // Teardown is called when the application terminates
