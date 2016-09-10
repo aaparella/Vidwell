@@ -6,8 +6,11 @@ import "github.com/jinzhu/gorm"
 type User struct {
 	AccountName   string
 	DisplayName   string
-	Email         string
+	Email         string `gorm:"unique"`
 	Administrator bool
+
+	// Password is the bcrypt hashed password for this user.
+	Password []byte
 
 	// The videos that this user has uploaded
 	Uploads []Video

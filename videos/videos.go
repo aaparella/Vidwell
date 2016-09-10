@@ -7,8 +7,8 @@ import (
 
 	"code.google.com/p/go-uuid/uuid"
 	"github.com/aaparella/vidwell/models"
+	"github.com/aaparella/vidwell/render"
 	"github.com/aaparella/vidwell/storage"
-	"github.com/aaparella/vidwell/views"
 	"github.com/gorilla/mux"
 )
 
@@ -26,7 +26,7 @@ func StoreVideo(data []byte, contentType, title, creator string) {
 
 // UploadVideo uploads video content to content storage, nothing else
 func UploadVideo(data []byte, contentType, name string) error {
-	return storage.Upload(data, name, "videos", contentType)
+	return storage.Upload(data, name, "vidwell.videos", contentType)
 }
 
 // CreateVideoRecord creates the database record with metadata about the
@@ -46,7 +46,7 @@ func ViewVideo(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Could not find video with ID: %s", id)
 		return
 	}
-	views.Render(w, "video", video)
+	render.Render(w, "video", video)
 }
 
 func ViewVideos(w http.ResponseWriter, r *http.Request) {
@@ -55,5 +55,5 @@ func ViewVideos(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Could not find videos : %s", err.Error())
 		return
 	}
-	views.Render(w, "videos", videos)
+	render.Render(w, "videos", videos)
 }

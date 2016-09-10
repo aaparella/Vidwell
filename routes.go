@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/aaparella/vidwell/users"
 	"github.com/aaparella/vidwell/videos"
-	"github.com/aaparella/vidwell/views"
 	"github.com/gorilla/mux"
 )
 
@@ -24,11 +23,12 @@ import (
 //      keys := mux.Vars(r)
 //      id, ok := keys["id"]
 func RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/", views.LandingPage)
-
 	router.HandleFunc("/video/{id}", videos.ViewVideo)
 	router.HandleFunc("/videos", videos.ViewVideos)
 
 	router.HandleFunc("/user/{id}", users.ViewUser)
-	router.HandleFunc("/upload", Upload)
+	router.HandleFunc("/upload", users.MustBeLoggedIn(Upload))
+
+	router.HandleFunc("/register", users.NewUser).Methods("POST")
+	router.HandleFunc("/login", users.Login).Methods("POST")
 }

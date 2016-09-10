@@ -1,4 +1,4 @@
-package views
+package render
 
 import (
 	"encoding/json"
@@ -33,12 +33,21 @@ func Render(w io.Writer, tmpl string, data interface{}) {
 	}
 }
 
+// ErrorPageData is used to render an error page when an error occurs while
+// rendering a page.
 type ErrorPageData struct {
 	File  string
 	Data  string
 	Error string
 }
 
+// renderErrorPage displays what the error was, along with the data passed
+// in to the template, along with the template file name.
+//
+// This in turn calls Render, which may not be the best idea,
+// because if *that* call fails, there is an endless recursion where Render
+// and renderErrorPage keep getting called. So, make sure renderErrorPage
+// cannot cause an error with it's call to Render.
 func renderErrorPage(w io.Writer, tmpl string, data interface{}, err error) {
 	d, _ := json.MarshalIndent(data, "", "	")
 	Render(w, "error", ErrorPageData{

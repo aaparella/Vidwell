@@ -20,7 +20,7 @@ func InitializeObjectStorage(conf config.StorageConfiguration) error {
 		return fmt.Errorf("\nCould not connect to storage service: %s", err)
 	}
 
-	if err := CreateBuckets("videos", "thumbnails", "avatars"); err != nil {
+	if err := CreateBuckets("vidwell.videos", "vidwell.thumbnails", "vidwell.avatars"); err != nil {
 		return fmt.Errorf("Error creating necessary buckets: %s", err)
 	}
 

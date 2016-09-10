@@ -22,14 +22,16 @@ type RenderingConfiguration struct {
 	TemplatesDir string
 }
 
+type SessionConfiguration struct {
+	Key string
+}
+
 // Configuration encapsulates configuration of all submodules within the
 // application.
 type Configuration struct {
-	// Storage module configuration
-	Storage StorageConfiguration
-
-	// Rendering module configuration
+	Storage   StorageConfiguration
 	Rendering RenderingConfiguration
+	Session   SessionConfiguration
 }
 
 var conf Configuration
@@ -48,4 +50,8 @@ func GetStorageConfiguration() StorageConfiguration {
 
 func GetRenderingConfiguration() RenderingConfiguration {
 	return conf.Rendering
+}
+
+func GetSessionConfiguration() SessionConfiguration {
+	return conf.Session
 }
