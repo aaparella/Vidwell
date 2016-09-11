@@ -14,4 +14,19 @@ Planned Features
 How to Run
 ===
 
-VidWell can easily be run locally. Simply modify the config.ini file with the URL of the object storage service, and the respective keys. Also set the database url appropriately. Then the application can simply be built and run as a normal go application.
+VidWell can easily be run locally. Simply modify the config.ini file with the URL of the object storage service, and the respective keys. Also set the database url appropriately. Then the application can simply be built and run as a normal go application. The following is an example config.ini file, with the values annotated.
+
+[Storage]
+
+Endpoint=        # Object store endpoint 
+AccessKeyID=     # Object store credentials
+SecretAccessKey= # Object store credentials
+UseSSL=          # Connect to object storage using SSL
+Database=        # URL passed to gorm.Open()
+DatabaseLog=     # Control log level of database results
+
+[Rendering]
+TempaltesDir=./views # Directory containing templates
+
+[Session]
+Key=             # Key used to encrypt cookies

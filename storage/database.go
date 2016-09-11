@@ -20,6 +20,7 @@ func InitializeDatabase(conf config.StorageConfiguration) error {
 		return fmt.Errorf("Could not connect to database %s:%s",
 			conf.Database, err.Error())
 	}
+	DB.LogMode(conf.DatabaseLog)
 	return MigrateTables()
 }
 

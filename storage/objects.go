@@ -3,6 +3,9 @@ package storage
 import (
 	"bytes"
 	"fmt"
+	"log"
+	"net/url"
+	"time"
 
 	"github.com/aaparella/vidwell/config"
 	minio "github.com/minio/minio-go"
@@ -75,4 +78,18 @@ func BucketExists(name string, buckets []minio.BucketInfo) bool {
 
 func CreateBucket(name string) error {
 	return client.MakeBucket(name, "")
+}
+
+func GetObjectUrl(name, bucket string) *url.URL {
+	url, err := client.PresignedGetObject(bucket, name, time.Hour, nil)
+	if err != nil {
+		log.Println("Could not get URL : ", err.Error())
+		return nil
+	}
+
+	return url
+}
+
+func GetVideoUrl(uuid string) *url.URL {
+	return GetObjectUrl(uuid, "vidwell.videos")
 }

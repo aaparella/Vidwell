@@ -7,6 +7,8 @@ type Video struct {
 	Uuid        string
 	ContentType string
 
+	Views uint
+
 	UserID uint
 
 	gorm.Model

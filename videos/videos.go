@@ -2,6 +2,7 @@ package videos
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -9,23 +10,47 @@ import (
 	"github.com/aaparella/vidwell/models"
 	"github.com/aaparella/vidwell/render"
 	"github.com/aaparella/vidwell/storage"
+	"github.com/aaparella/vidwell/users"
 	"github.com/gorilla/mux"
 )
 
+func UploadVideo(w http.ResponseWriter, r *http.Request) {
+	r.ParseMultipartForm(2 << 32)
+	file, handler, err := r.FormFile("fileupload")
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	defer file.Close()
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	go StoreVideo(data,
+		handler.Header.Get("Content-Type"),
+		r.FormValue("title"),
+		users.GetUser(r))
+
+	fmt.Fprintf(w, "Thank you for the video!")
+}
+
 // StoreVideo is a very badly named function.
-func StoreVideo(data []byte, contentType, title, creator string) {
+func StoreVideo(data []byte, contentType, title string, user *models.User) {
 	name := uuid.New()
-	if err := UploadVideo(data, contentType, name); err != nil {
+	if err := StoreVideoObject(data, contentType, name); err != nil {
 		log.Println("Could not store video : ", err)
 		return
 	}
-	if err := CreateVideoRecord(title, name, contentType, 0); err != nil {
+	if err := CreateVideoRecord(title, name, contentType, user.ID); err != nil {
 		log.Println("Could not create video record : ", err)
 	}
 }
 
 // UploadVideo uploads video content to content storage, nothing else
-func UploadVideo(data []byte, contentType, name string) error {
+func StoreVideoObject(data []byte, contentType, name string) error {
 	return storage.Upload(data, name, "vidwell.videos", contentType)
 }
 
@@ -36,7 +61,13 @@ func CreateVideoRecord(title, uuid, content string, userID uint) error {
 		Title:       title,
 		Uuid:        uuid,
 		ContentType: content,
+		UserID:      userID,
 	}).Error
+}
+
+type VideoPageData struct {
+	Video    models.Video
+	VideoURL string
 }
 
 func ViewVideo(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +77,14 @@ func ViewVideo(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Could not find video with ID: %s", id)
 		return
 	}
-	render.Render(w, "video", video)
+	url := storage.GetVideoUrl(video.Uuid)
+
+	data := VideoPageData{
+		Video:    video,
+		VideoURL: url.String(),
+	}
+
+	render.Render(w, "video", data)
 }
 
 func ViewVideos(w http.ResponseWriter, r *http.Request) {

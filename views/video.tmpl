@@ -1,2 +1,7 @@
-<h1>{{ .Title }}</h1>
-<p> {{ .Uuid }}</p>
+<h1>{{ .Video.Title }}</h1>
+<p> {{ .Video.Uuid }}</p>
+
+<video width="320" height="240" controls>
+    <source src="{{ .VideoURL }}" type="{{ .Video.ContentType }}">
+    Your browser does not support the video tag!
+</video>

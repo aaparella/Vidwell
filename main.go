@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -10,32 +8,8 @@ import (
 	"syscall"
 
 	"github.com/aaparella/vidwell/storage"
-	"github.com/aaparella/vidwell/videos"
 	"github.com/gorilla/mux"
 )
-
-func Upload(w http.ResponseWriter, r *http.Request) {
-	r.ParseMultipartForm(2 << 32)
-	file, handler, err := r.FormFile("fileupload")
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-
-	defer file.Close()
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-
-	go videos.StoreVideo(data,
-		handler.Header.Get("Content-Type"),
-		r.FormValue("title"),
-		"aaparella")
-
-	fmt.Fprintf(w, "Thank you for the video!")
-}
 
 // Teardown is called when the application terminates
 func Teardown(signal os.Signal) {

@@ -14,6 +14,7 @@ type StorageConfiguration struct {
 	SecretAccessKey string
 	UseSSL          bool
 	Database        string
+	DatabaseLog     bool
 }
 
 // RenderingConfiguration specifies the directory template files

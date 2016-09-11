@@ -27,7 +27,7 @@ func RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/videos", videos.ViewVideos)
 
 	router.HandleFunc("/user/{id}", users.ViewUser)
-	router.HandleFunc("/upload", users.MustBeLoggedIn(Upload))
+	router.HandleFunc("/upload", users.MustBeLoggedIn(videos.UploadVideo))
 
 	router.HandleFunc("/register", users.NewUser).Methods("POST")
 	router.HandleFunc("/login", users.Login).Methods("POST")
