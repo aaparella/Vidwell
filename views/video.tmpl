@@ -1,3 +1,5 @@
+{{ define "body" }}
+
 <h1>{{ .Video.Title }}</h1>
 <p> {{ .Video.Uuid }}</p>
 
@@ -7,3 +9,5 @@
 </video>
 
 <p> Uploaded by : {{ .User.AccountName }} Views : {{ .Video.Views }} </p>
+
+{{ end }}

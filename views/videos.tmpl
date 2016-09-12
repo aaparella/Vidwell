@@ -1,7 +1,11 @@
+{{ define "body" }} 
+
 {{ range .Videos }}
     <div class="video"> 
-        <a href="http://localhost:8080/video/{{ .ID }}">
+        <a href="http://localhost:8080/videos/{{ .ID }}">
             <h1>{{ .Title }} {{ .Uuid }}</h1>
         </a>
     </div>
+{{ end }}
+
 {{ end }}

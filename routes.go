@@ -1,10 +1,17 @@
 package main
 
 import (
-	"github.com/aaparella/vidwell/users"
-	"github.com/aaparella/vidwell/videos"
+	"net/http"
+	"strings"
+
+	"github.com/aaparella/vidwell/controllers"
 	"github.com/gorilla/mux"
 )
+
+type Controller interface {
+	Prefix() string
+	Endpoints() map[string]map[string]http.HandlerFunc
+}
 
 // RegisterRoutes prepares the router with all routes needed for the entire
 // application.
@@ -23,12 +30,16 @@ import (
 //      keys := mux.Vars(r)
 //      id, ok := keys["id"]
 func RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/video/{id}", videos.ViewVideo)
-	router.HandleFunc("/videos", videos.ViewVideos)
+	register := func(c Controller) {
+		subrouter := router.PathPrefix(c.Prefix()).Subrouter()
 
-	router.HandleFunc("/user/{id}", users.ViewUser)
-	router.HandleFunc("/upload", users.MustBeLoggedIn(videos.UploadVideo))
+		for path, handlers := range c.Endpoints() {
+			for methods, fn := range handlers {
+				subrouter.HandleFunc(path, fn).Methods(strings.Split(methods, ", ")...)
+			}
+		}
+	}
 
-	router.HandleFunc("/register", users.NewUser).Methods("POST")
-	router.HandleFunc("/login", users.Login).Methods("POST")
+	register(controllers.VideoController{})
+	register(controllers.UserController{})
 }
