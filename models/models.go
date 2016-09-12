@@ -18,3 +18,12 @@ type User struct {
 	// ID, CreatedAt, UpdatedAt, DeletedAt
 	gorm.Model
 }
+
+type Video struct {
+	Title       string
+	Uuid        string
+	ContentType string
+	Views       uint
+	UserID      uint
+	gorm.Model
+}

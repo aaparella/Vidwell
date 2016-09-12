@@ -2,6 +2,8 @@
 <p> {{ .Video.Uuid }}</p>
 
 <video width="320" height="240" controls>
-    <source src="{{ .VideoURL }}" type="{{ .Video.ContentType }}">
+    <source src="{{ .VideoUrl }}" type="{{ .Video.ContentType }}">
     Your browser does not support the video tag!
 </video>
+
+<p> Uploaded by : {{ .User.AccountName }} Views : {{ .Video.Views }} </p>

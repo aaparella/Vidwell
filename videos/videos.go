@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 
 	"code.google.com/p/go-uuid/uuid"
 	"github.com/aaparella/vidwell/models"
@@ -65,26 +66,25 @@ func CreateVideoRecord(title, uuid, content string, userID uint) error {
 	}).Error
 }
 
-type VideoPageData struct {
-	Video    models.Video
-	VideoURL string
-}
-
 func ViewVideo(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	var video models.Video
+	var user models.User
 	if err := storage.DB.Find(&video, id).Error; err != nil {
 		fmt.Fprintf(w, "Could not find video with ID: %s", id)
 		return
 	}
-	url := storage.GetVideoUrl(video.Uuid)
+	url := GetVideoUrl(video.Uuid)
+	video.Views += 1
+	storage.DB.Save(&video)
 
-	data := VideoPageData{
-		Video:    video,
-		VideoURL: url.String(),
-	}
+	storage.DB.Find(&user, video.UserID)
 
-	render.Render(w, "video", data)
+	render.Render(w, "video", map[string]interface{}{
+		"Video":    video,
+		"User":     user,
+		"VideoUrl": url.String(),
+	})
 }
 
 func ViewVideos(w http.ResponseWriter, r *http.Request) {
@@ -93,5 +93,11 @@ func ViewVideos(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Could not find videos : %s", err.Error())
 		return
 	}
-	render.Render(w, "videos", videos)
+	render.Render(w, "videos", map[string]interface{}{
+		"Videos": videos,
+	})
+}
+
+func GetVideoUrl(uuid string) *url.URL {
+	return storage.GetObjectUrl(uuid, "vidwell.videos")
 }

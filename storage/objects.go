@@ -89,7 +89,3 @@ func GetObjectUrl(name, bucket string) *url.URL {
 
 	return url
 }
-
-func GetVideoUrl(uuid string) *url.URL {
-	return GetObjectUrl(uuid, "vidwell.videos")
-}
