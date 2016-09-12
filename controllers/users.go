@@ -39,8 +39,8 @@ func (uc UserController) ViewUser(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	var user models.User
 
-	if err := storage.DB.Find(&user, id); err != nil {
-		fmt.Fprintf(w, "Could not find user with ID: %s", id)
+	if err := storage.DB.Find(&user, id).Error; err != nil {
+		fmt.Fprintf(w, "Could not find user with ID: %s, %s", id, err.Error())
 		return
 	}
 
