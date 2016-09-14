@@ -20,9 +20,13 @@ type StorageConfiguration struct {
 // RenderingConfiguration specifies the directory template files
 // will be located in.
 type RenderingConfiguration struct {
+	// TemplatesDir is the directory that template files can be found int.
+	// Templates must end with the .tmpl file extension.
 	TemplatesDir string
 }
 
+// SessionConfiguration defines the key that is used to encrypt all
+// user sessions.
 type SessionConfiguration struct {
 	Key string
 }
@@ -45,14 +49,20 @@ func init() {
 	}
 }
 
+// GetStorageConfiguration returns the storage configuration specified in
+// the config.ini file
 func GetStorageConfiguration() StorageConfiguration {
 	return conf.Storage
 }
 
+// GetRenderingConfiguration returns the Rednering storage configuration
+// specified in the config.ini file
 func GetRenderingConfiguration() RenderingConfiguration {
 	return conf.Rendering
 }
 
+// GetSessionConfiguration returns the session configuration specified in
+// the config.ini file
 func GetSessionConfiguration() SessionConfiguration {
 	return conf.Session
 }

@@ -13,6 +13,9 @@ import (
 
 var client *minio.Client
 
+// InitializeObjectStorage creates the requisite buckets for storage if they do
+// not already exist, and ensures that the configuration provided is valid and
+// allows us to connect to S3 or whatever the service may be.
 func InitializeObjectStorage(conf config.StorageConfiguration) error {
 	var err error
 	client, err = minio.New(conf.Endpoint,
@@ -23,7 +26,9 @@ func InitializeObjectStorage(conf config.StorageConfiguration) error {
 		return fmt.Errorf("\nCould not connect to storage service: %s", err)
 	}
 
-	if err := CreateBuckets("vidwell.videos", "vidwell.thumbnails", "vidwell.avatars"); err != nil {
+	if err := CreateBuckets("vidwell.videos",
+		"vidwell.thumbnails",
+		"vidwell.avatars"); err != nil {
 		return fmt.Errorf("Error creating necessary buckets: %s", err)
 	}
 
@@ -41,6 +46,7 @@ func Upload(data []byte, name, bucket, contentType string) error {
 	return err
 }
 
+// CreateBuckets creates buckets with the names passed in to the function.
 func CreateBuckets(names ...string) error {
 	buckets, err := client.ListBuckets()
 	if err != nil {
@@ -60,6 +66,7 @@ func CreateBuckets(names ...string) error {
 	return err
 }
 
+// EnsureExists checks if the named bucket exists, and create it if it doesn't.
 func EnsureExists(name string, buckets []minio.BucketInfo) error {
 	if exists := BucketExists(name, buckets); !exists {
 		return CreateBucket(name)
@@ -67,6 +74,7 @@ func EnsureExists(name string, buckets []minio.BucketInfo) error {
 	return nil
 }
 
+// BucketExists checks if a bucket with the specified name is exists.
 func BucketExists(name string, buckets []minio.BucketInfo) bool {
 	for _, bucket := range buckets {
 		if bucket.Name == name {
@@ -76,10 +84,15 @@ func BucketExists(name string, buckets []minio.BucketInfo) bool {
 	return false
 }
 
+// CreateBucket creates a bucket in the object storage service that
+// we have already connected to. If the client is not yet connected,
+// this will fail.
 func CreateBucket(name string) error {
 	return client.MakeBucket(name, "")
 }
 
+// GetObjectUrl gets a public facing URL that is valid for one hour, and allows
+// us to stream the contents of that bucket to a user. Needs to be reworked.
 func GetObjectUrl(name, bucket string) *url.URL {
 	url, err := client.PresignedGetObject(bucket, name, time.Hour, nil)
 	if err != nil {

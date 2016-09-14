@@ -14,6 +14,8 @@ import (
 	"github.com/siddontang/go/log"
 )
 
+// VideoController contains all endpoints and webpages regarding viewing
+// and editing, uploading, or deleting videos.
 type VideoController struct {
 }
 
@@ -35,6 +37,8 @@ func (vc VideoController) Endpoints() map[string]map[string]http.HandlerFunc {
 	}
 }
 
+// ViewVideos displays a list of all public videos. Videos that are private
+// will not be included.
 func (vc VideoController) ViewVideos(w http.ResponseWriter, r *http.Request) {
 	var videos []models.Video
 	if err := storage.DB.Find(&videos).Error; err != nil {
@@ -47,10 +51,14 @@ func (vc VideoController) ViewVideos(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// ViewVideo displays a single video's page. Performs a check that the user that
+// is logged in has access to this video, or if they are not logged in ensures
+// that the video is public.
 func (vc VideoController) ViewVideo(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	var video models.Video
 	var user models.User
+
 	if err := storage.DB.Find(&video, id).Error; err != nil {
 		if err != gorm.ErrRecordNotFound {
 			http.Error(w, "Error accessing video", http.StatusInternalServerError)
@@ -59,6 +67,7 @@ func (vc VideoController) ViewVideo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "No video with that ID", http.StatusNotFound)
 		return
 	}
+
 	url := videos.GetVideoUrl(video.Uuid)
 	video.Views += 1
 	storage.DB.Save(&video)
@@ -71,6 +80,10 @@ func (vc VideoController) ViewVideo(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// UploadVideo stores a video in S3, and creates a record for it in the database.
+// Only creates the video record in the case of a successful video storage.
+// Will redirect to the page where that video can be configured, e.g. title
+// and permissions, etc.
 func (vc VideoController) UploadVideo(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(2 << 32)
 	file, handler, err := r.FormFile("fileupload")

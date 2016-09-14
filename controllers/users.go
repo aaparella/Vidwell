@@ -14,6 +14,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// UserController consolidates behavior regarding the viewing and creation
+// of new user accounts, as well as logging in.
 type UserController struct {
 }
 
@@ -35,6 +37,8 @@ func (uc UserController) Endpoints() map[string]map[string]http.HandlerFunc {
 	}
 }
 
+// ViewUser displays the user account page for the specified user.
+// The user id is retrieved from the url path.
 func (uc UserController) ViewUser(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	var user models.User

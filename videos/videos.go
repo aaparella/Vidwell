@@ -37,6 +37,8 @@ func CreateVideoRecord(title, uuid, content string, userID uint) error {
 	}).Error
 }
 
+// GetVideoUrl gets a publicly accessible URL for the video with the specified
+// uuid.
 func GetVideoUrl(uuid string) *url.URL {
 	return storage.GetObjectUrl(uuid, "vidwell.videos")
 }

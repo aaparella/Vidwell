@@ -19,7 +19,11 @@ func init() {
 	// TODO: add verification that this directory exists, etc.
 }
 
+// PageData is what is ultimately passed in to render the root template.
+// This allows for render to be called anywhere without having to deal with
+// the logic needed to fetch the currently logged in user, etc.
 type PageData struct {
+	// User is the currently logged in user, or nil if they are not logged in.
 	User *models.User
 	Data interface{}
 }

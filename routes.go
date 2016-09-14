@@ -8,8 +8,25 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Controller defines a web controller that can be registered with a mux
+// to serve webpages and endpoints.
 type Controller interface {
+	// Prefix is the root path that all endpoints will be accessible through
+	// for this controller.
 	Prefix() string
+	// Endpoints defines the web pages and APIs that this controller offers.
+	// The first key is the path for the handler, and the second maps each
+	// method to the appropriate handler.
+	//
+	// map[string]map[string]http.HandlerFunc{
+	//   "/users": {
+	//   	"GET": c.ViewUsers,
+	//   },
+	//   "/users/new": {
+	//	 	"GET": c.NewUserPage,
+	//   	"POST": c.MakeNewUser,
+	//   }
+	// }
 	Endpoints() map[string]map[string]http.HandlerFunc
 }
 
@@ -30,6 +47,7 @@ type Controller interface {
 //      keys := mux.Vars(r)
 //      id, ok := keys["id"]
 func RegisterRoutes(router *mux.Router) {
+	// register adds the routes defined by the controller to the router.
 	register := func(c Controller) {
 		subrouter := router.PathPrefix(c.Prefix()).Subrouter()
 
