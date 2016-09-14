@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -40,7 +40,7 @@ func (uc UserController) ViewUser(w http.ResponseWriter, r *http.Request) {
 	var user models.User
 
 	if err := storage.DB.Find(&user, id).Error; err != nil {
-		fmt.Fprintf(w, "Could not find user with ID: %s, %s", id, err.Error())
+		http.Error(w, "Could not find user with that ID", http.StatusNotFound)
 		return
 	}
 
@@ -57,22 +57,24 @@ func (uc UserController) NewUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !users.ValidEmail(u.Email) || !users.ValidPassword(string(u.Password)) {
-		fmt.Fprintf(w, "Username, email or password invalid")
+		http.Error(w, "Username, password, or email invalid", http.StatusBadRequest)
 		return
 	}
 
 	password, err := bcrypt.GenerateFromPassword(u.Password, 0)
 	if err != nil {
-		fmt.Fprintf(w, err.Error())
+		log.Println(w, "Error creating password hash :", err.Error())
+		http.Error(w, "Error creating password hash", http.StatusInternalServerError)
 		return
 	}
 	u.Password = password
 
 	if err := storage.DB.Create(u).Error; err != nil {
-		fmt.Fprintf(w, "Could not create new user: %s", err.Error())
+		log.Println(w, "Could not create new user: %s", err.Error())
+		http.Error(w, "Could not create new user", http.StatusInternalServerError)
 	} else {
 		users.LoginUser(w, r, u)
-		fmt.Fprintf(w, "Thank you for registering!")
+		http.Redirect(w, r, "/users/", http.StatusCreated)
 	}
 }
 
@@ -84,13 +86,13 @@ func (uc UserController) NewUser(w http.ResponseWriter, r *http.Request) {
 // emails.
 func (uc UserController) Login(w http.ResponseWriter, r *http.Request) {
 	if user := users.GetUser(r); user != nil {
-		fmt.Fprintf(w, "You are already logged in!")
+		http.Redirect(w, r, "/", http.StatusOK)
 		return
 	}
 
 	email, pass := r.FormValue("email"), r.FormValue("password")
 	if !users.ValidEmail(email) || !users.ValidPassword(pass) {
-		fmt.Fprintf(w, "Please enter a valid email and password")
+		http.Error(w, "Invalid email or password", http.StatusBadRequest)
 		return
 	}
 
@@ -101,11 +103,11 @@ func (uc UserController) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := bcrypt.CompareHashAndPassword(u.Password, []byte(pass)); err != nil {
-		fmt.Fprintf(w, "Incorrect username / password combination")
+		http.Error(w, "Incorrect username and password combination", http.StatusUnauthorized)
 	} else {
 		sess := session.GetSession(r)
 		sess.Values["user"] = u
 		sess.Save(r, w)
-		fmt.Fprintf(w, "Welcome back")
+		http.Redirect(w, r, "/", http.StatusOK)
 	}
 }

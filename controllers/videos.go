@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -11,6 +10,8 @@ import (
 	"github.com/aaparella/vidwell/users"
 	"github.com/aaparella/vidwell/videos"
 	"github.com/gorilla/mux"
+	"github.com/jinzhu/gorm"
+	"github.com/siddontang/go/log"
 )
 
 type VideoController struct {
@@ -22,7 +23,7 @@ func (vc VideoController) Prefix() string {
 
 func (vc VideoController) Endpoints() map[string]map[string]http.HandlerFunc {
 	return map[string]map[string]http.HandlerFunc{
-		"/": {
+		"": {
 			"GET": vc.ViewVideos,
 		},
 		"/{id}": {
@@ -37,7 +38,8 @@ func (vc VideoController) Endpoints() map[string]map[string]http.HandlerFunc {
 func (vc VideoController) ViewVideos(w http.ResponseWriter, r *http.Request) {
 	var videos []models.Video
 	if err := storage.DB.Find(&videos).Error; err != nil {
-		fmt.Fprintf(w, "Could not find videos : %s", err.Error())
+		log.Error("Could not find videos : ", err.Error())
+		http.Error(w, "Error finding videos", http.StatusInternalServerError)
 		return
 	}
 	render.Render(w, r, "videos", map[string]interface{}{
@@ -50,13 +52,16 @@ func (vc VideoController) ViewVideo(w http.ResponseWriter, r *http.Request) {
 	var video models.Video
 	var user models.User
 	if err := storage.DB.Find(&video, id).Error; err != nil {
-		fmt.Fprintf(w, "Could not find video with ID: %s", id)
+		if err != gorm.ErrRecordNotFound {
+			http.Error(w, "Error accessing video", http.StatusInternalServerError)
+			return
+		}
+		http.Error(w, "No video with that ID", http.StatusNotFound)
 		return
 	}
 	url := videos.GetVideoUrl(video.Uuid)
 	video.Views += 1
 	storage.DB.Save(&video)
-
 	storage.DB.Find(&user, video.UserID)
 
 	render.Render(w, r, "video", map[string]interface{}{
@@ -70,14 +75,14 @@ func (vc VideoController) UploadVideo(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(2 << 32)
 	file, handler, err := r.FormFile("fileupload")
 	if err != nil {
-		fmt.Fprintf(w, err.Error())
+		http.Error(w, "Invalid form", http.StatusBadRequest)
 		return
 	}
 
 	defer file.Close()
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
-		fmt.Fprintf(w, err.Error())
+		http.Error(w, "Could not read file", http.StatusInternalServerError)
 		return
 	}
 
@@ -86,5 +91,5 @@ func (vc VideoController) UploadVideo(w http.ResponseWriter, r *http.Request) {
 		r.FormValue("title"),
 		users.GetUser(r))
 
-	fmt.Fprintf(w, "Thank you for the video!")
+	http.Redirect(w, r, "/", http.StatusCreated)
 }
