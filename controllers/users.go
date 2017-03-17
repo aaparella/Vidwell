@@ -8,7 +8,6 @@ import (
 
 	"github.com/aaparella/vidwell/models"
 	"github.com/aaparella/vidwell/render"
-	"github.com/aaparella/vidwell/session"
 	"github.com/aaparella/vidwell/storage"
 	"github.com/aaparella/vidwell/users"
 	"github.com/gorilla/mux"
@@ -23,6 +22,12 @@ func (uc UserController) Prefix() string {
 	return "/users"
 }
 
+// Endpoints defines the endpoints for user operations. Makes heavy use of
+// methods defined in the User module for creating / managing user data.
+//
+// ViewUser displays a user's profile page.
+// Login allows a user to log in to their account.
+// NewUser allows a user to sign up and create a new account.
 func (uc UserController) Endpoints() map[string]map[string]http.HandlerFunc {
 	return map[string]map[string]http.HandlerFunc{
 		"/{id}": {
@@ -65,14 +70,7 @@ func (uc UserController) NewUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	password, err := bcrypt.GenerateFromPassword(u.Password, 0)
-	if err != nil {
-		log.Println(w, "Error creating password hash :", err.Error())
-		http.Error(w, "Error creating password hash", http.StatusInternalServerError)
-		return
-	}
-	u.Password = password
-
+	u.Password, _ = bcrypt.GenerateFromPassword(u.Password, 0)
 	if err := storage.DB.Create(u).Error; err != nil {
 		log.Println(w, "Could not create new user: %s", err.Error())
 		http.Error(w, "Could not create new user", http.StatusInternalServerError)
@@ -89,29 +87,18 @@ func (uc UserController) NewUser(w http.ResponseWriter, r *http.Request) {
 // does not exist so that timing attacks cannot be used to identify user
 // emails.
 func (uc UserController) Login(w http.ResponseWriter, r *http.Request) {
-	if user := users.GetUser(r); user != nil {
+	if user := users.GetLoggedInUser(r); user != nil {
 		http.Redirect(w, r, "/", http.StatusOK)
 		return
 	}
 
 	email, pass := r.FormValue("email"), r.FormValue("password")
-	if !users.ValidEmail(email) || !users.ValidPassword(pass) {
-		http.Error(w, "Invalid email or password", http.StatusBadRequest)
-		return
-	}
+	user := users.CheckLoginInformation(email, pass)
 
-	u := &models.User{}
-	storage.DB.Where(&models.User{Email: email}).First(u)
-	if u.Email == "" {
-		u.Password = []byte("   ")
-	}
-
-	if err := bcrypt.CompareHashAndPassword(u.Password, []byte(pass)); err != nil {
+	if user == nil {
 		http.Error(w, "Incorrect username and password combination", http.StatusUnauthorized)
 	} else {
-		sess := session.GetSession(r)
-		sess.Values["user"] = u
-		sess.Save(r, w)
+		users.LoginUser(w, r, user)
 		http.Redirect(w, r, "/", http.StatusOK)
 	}
 }

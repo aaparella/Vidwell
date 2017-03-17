@@ -39,6 +39,7 @@ func MigrateTables() error {
 	m := []interface{}{
 		&models.User{},
 		&models.Video{},
+		&models.Subscription{},
 	}
 
 	if err := DB.AutoMigrate(m...).Error; err != nil {

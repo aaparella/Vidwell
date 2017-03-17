@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/url"
 
-	"code.google.com/p/go-uuid/uuid"
 	"github.com/aaparella/vidwell/models"
 	"github.com/aaparella/vidwell/storage"
+	"github.com/pborman/uuid"
 )
 
 // StoreVideo is a very badly named function.
@@ -19,6 +19,13 @@ func StoreVideo(data []byte, contentType, title string, user *models.User) {
 	if err := CreateVideoRecord(title, name, contentType, user.ID); err != nil {
 		log.Println("Could not create video record : ", err)
 	}
+}
+
+// GetVideo fetches the video model for a given id.
+func GetVideo(id uint) (models.Video, error) {
+	var video models.Video
+	storage.DB.Find(&video, id)
+	return video, storage.DB.Error
 }
 
 // UploadVideo uploads video content to content storage, nothing else
@@ -39,6 +46,6 @@ func CreateVideoRecord(title, uuid, content string, userID uint) error {
 
 // GetVideoUrl gets a publicly accessible URL for the video with the specified
 // uuid.
-func GetVideoUrl(uuid string) *url.URL {
-	return storage.GetObjectUrl(uuid, "vidwell.videos")
+func GetVideoUrl(video models.Video) *url.URL {
+	return storage.GetObjectUrl(video.Uuid, "vidwell.videos")
 }

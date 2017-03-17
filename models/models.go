@@ -27,3 +27,14 @@ type Video struct {
 	UserID      uint
 	gorm.Model
 }
+
+// Subscription represents the subscription of one account
+// to the contents of the other
+type Subscription struct {
+	// Subscriber is the user that IS subscribed
+	Subscriber uint
+	// Creator is the user that is susbcribed TO
+	Creator uint
+
+	gorm.Model
+}

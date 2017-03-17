@@ -9,12 +9,18 @@ import (
 // Storage contains needed access keys and enpoints for accessing
 // the video and thumbnail storage service.
 type StorageConfiguration struct {
-	Endpoint        string
-	AccessKeyID     string
+	// Endpoint is the URL that will be used to access object storage.
+	Endpoint string
+	// AccessKeyID is the access key used for object storage.
+	AccessKeyID string
+	// SecretAccessKey is the secret key used for object storage.
 	SecretAccessKey string
-	UseSSL          bool
-	Database        string
-	DatabaseLog     bool
+	// UseSSL controls whether or not SSL is used to connect to object storage.
+	UseSSL bool
+	// Database is the string of options used to connect to a relational database.
+	Database string
+	// DatabaseLog controls the log level of database operations.
+	DatabaseLog bool
 }
 
 // RenderingConfiguration specifies the directory template files
@@ -28,15 +34,19 @@ type RenderingConfiguration struct {
 // SessionConfiguration defines the key that is used to encrypt all
 // user sessions.
 type SessionConfiguration struct {
+	// Key used for session encryption.
 	Key string
 }
 
 // Configuration encapsulates configuration of all submodules within the
 // application.
 type Configuration struct {
-	Storage   StorageConfiguration
+	// Storage contains all configuration for storage services.
+	Storage StorageConfiguration
+	// Rendering contains all configuration for rendering services.
 	Rendering RenderingConfiguration
-	Session   SessionConfiguration
+	// Session contrains all configuration for session management.
+	Session SessionConfiguration
 }
 
 var conf Configuration

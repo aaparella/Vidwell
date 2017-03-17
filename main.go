@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -11,14 +12,22 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// Teardown is called when the application terminates
+// Teardown is called when the application terminates. Any module that needs to
+// perform any logic or cleanup on application close needs to be called from here.
+//
+// Any errors will be logged but ignored to allow all modules to at least attempt
+// to perform teardown steps.
 func Teardown(signal os.Signal) {
 	log.Println("Received", signal, "signal, shutting down")
-	log.Println("Database teardown...")
-	if err := storage.Teardown(); err != nil {
-		log.Println("Storage teardown error : ", err.Error())
-		os.Exit(1)
+
+	teardown := func(name string, fn func() error) {
+		log.Printf("Tearing down module : " + name + " ...")
+		if err := fn(); err != nil {
+			fmt.Printf(" ERROR : " + err.Error())
+		}
 	}
+
+	teardown("Database", storage.TeardownDatabase)
 	os.Exit(0)
 }
 

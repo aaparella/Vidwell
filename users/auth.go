@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/aaparella/vidwell/models"
 	"github.com/aaparella/vidwell/session"
+	"github.com/aaparella/vidwell/storage"
 )
 
 // MustBeLoggedIn wraps another http.HandlerFunc that requires a user to be
@@ -13,12 +16,26 @@ import (
 // user editing)
 func MustBeLoggedIn(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if user := GetUser(r); user != nil {
+		if user := GetLoggedInUser(r); user != nil {
 			f(w, r)
 		} else {
 			fmt.Fprintf(w, "You must be logged in for this!")
 		}
 	}
+}
+
+// CheckLoginInformation gets the user that the given email and
+// password match for. Returns nil if they do not match for any
+// users.
+func CheckLoginInformation(email, password string) *models.User {
+	u := &models.User{}
+	if err := storage.DB.Where(&models.User{Email: email}).First(u); err != nil {
+		return nil
+	}
+	if err := bcrypt.CompareHashAndPassword(u.Password, []byte(password)); err != nil {
+		return nil
+	}
+	return u
 }
 
 // LoginUser writes the passed user to the session for the passed request,

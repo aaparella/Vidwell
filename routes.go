@@ -49,15 +49,20 @@ type Controller interface {
 func RegisterRoutes(router *mux.Router) {
 	// register adds the routes defined by the controller to the router.
 	register := func(c Controller) {
-		subrouter := router.PathPrefix(c.Prefix()).Subrouter()
-
-		for path, handlers := range c.Endpoints() {
-			for methods, fn := range handlers {
-				subrouter.HandleFunc(path, fn).Methods(strings.Split(methods, ", ")...)
-			}
-		}
+		registerController(router, c)
 	}
 
+	// Register a controller here in order to register it's endpoints
 	register(controllers.VideoController{})
 	register(controllers.UserController{})
+}
+
+func registerController(router *mux.Router, c Controller) {
+	subrouter := router.PathPrefix(c.Prefix()).Subrouter()
+
+	for path, handlers := range c.Endpoints() {
+		for methods, fn := range handlers {
+			subrouter.HandleFunc(path, fn).Methods(strings.Split(methods, ", ")...)
+		}
+	}
 }

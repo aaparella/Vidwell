@@ -3,6 +3,7 @@ package controllers
 import (
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	"github.com/aaparella/vidwell/models"
 	"github.com/aaparella/vidwell/render"
@@ -10,7 +11,6 @@ import (
 	"github.com/aaparella/vidwell/users"
 	"github.com/aaparella/vidwell/videos"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
 	"github.com/siddontang/go/log"
 )
 
@@ -55,28 +55,27 @@ func (vc VideoController) ViewVideos(w http.ResponseWriter, r *http.Request) {
 // is logged in has access to this video, or if they are not logged in ensures
 // that the video is public.
 func (vc VideoController) ViewVideo(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
-	var video models.Video
-	var user models.User
-
-	if err := storage.DB.Find(&video, id).Error; err != nil {
-		if err != gorm.ErrRecordNotFound {
-			http.Error(w, "Error accessing video", http.StatusInternalServerError)
-			return
-		}
-		http.Error(w, "No video with that ID", http.StatusNotFound)
+	id, err := strconv.Atoi(mux.Vars(r)["id"])
+	if err != nil {
+		http.Error(w, "Could not find video with id "+mux.Vars(r)["id"], http.StatusBadRequest)
 		return
 	}
 
-	url := videos.GetVideoUrl(video.Uuid)
+	video, err := videos.GetVideo(uint(id))
+	if err != nil {
+		http.Error(w, "Could not find video : "+err.Error(), 500)
+	}
+
 	video.Views += 1
 	storage.DB.Save(&video)
-	storage.DB.Find(&user, video.UserID)
+
+	var creator models.User
+	storage.DB.Find(&creator, video.UserID)
 
 	render.Render(w, r, "video", map[string]interface{}{
 		"Video":    video,
-		"User":     user,
-		"VideoUrl": url.String(),
+		"User":     creator,
+		"VideoUrl": videos.GetVideoUrl(video),
 	})
 }
 
@@ -102,7 +101,7 @@ func (vc VideoController) UploadVideo(w http.ResponseWriter, r *http.Request) {
 	go videos.StoreVideo(data,
 		handler.Header.Get("Content-Type"),
 		r.FormValue("title"),
-		users.GetUser(r))
+		users.GetLoggedInUser(r))
 
 	http.Redirect(w, r, "/", http.StatusCreated)
 }

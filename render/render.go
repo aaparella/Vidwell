@@ -35,7 +35,7 @@ type PageData struct {
 // the template, or rendering it with the provided data.
 func Render(w http.ResponseWriter, r *http.Request, tmpl string, data interface{}) {
 	renderTemplate(w, tmpl, PageData{
-		User: users.GetUser(r),
+		User: users.GetLoggedInUser(r),
 		Data: data,
 	})
 }
