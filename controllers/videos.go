@@ -103,5 +103,5 @@ func (vc VideoController) UploadVideo(w http.ResponseWriter, r *http.Request) {
 		r.FormValue("title"),
 		users.GetLoggedInUser(r))
 
-	http.Redirect(w, r, "/", http.StatusCreated)
+	http.Redirect(w, r, "/", http.StatusAccepted)
 }

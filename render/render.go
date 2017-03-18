@@ -42,6 +42,7 @@ func Render(w http.ResponseWriter, r *http.Request, tmpl string, data interface{
 
 func renderTemplate(w io.Writer, tmpl string, data interface{}) {
 	template, err := template.ParseFiles(path.Join(templatesDir, "root.tmpl"),
+		path.Join(templatesDir, "header.tmpl"),
 		path.Join(templatesDir, tmpl+".tmpl"))
 	if err != nil {
 		renderErrorPage(w, tmpl, data, err)
