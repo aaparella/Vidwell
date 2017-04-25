@@ -30,7 +30,7 @@ func MustBeLoggedIn(f http.HandlerFunc) http.HandlerFunc {
 func CheckLoginInformation(email, password string) *models.User {
 	u := &models.User{}
 	if err := storage.DB.Where(&models.User{Email: email}).First(u); err != nil {
-		return nil
+		u = &models.User{Password: []byte{}}
 	}
 	if err := bcrypt.CompareHashAndPassword(u.Password, []byte(password)); err != nil {
 		return nil
