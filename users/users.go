@@ -23,14 +23,10 @@ func GetUser(id uint) (models.User, error) {
 func GetUsers(ids ...uint) ([]models.User, error) {
 	var err error
 	users := make([]models.User, len(ids))
-	get := func(index int, id uint) {
-		if err != nil {
-			return
-		}
-		users[index], err = GetUser(id)
-	}
 	for i, id := range ids {
-		get(i, id)
+		if err == nil {
+			users[i], err = GetUser(id)
+		}
 	}
 	return users, err
 }
@@ -38,7 +34,7 @@ func GetUsers(ids ...uint) ([]models.User, error) {
 // GetUser is a convenience function that returns the user for the request's
 // session, or nil if they are not yet logged in.
 func GetLoggedInUser(r *http.Request) *models.User {
-	val := session.GetSession(r).Values["user"]
+	val := session.GetSessionValue("user", r)
 	if user, ok := val.(*models.User); !ok {
 		return nil
 	} else {

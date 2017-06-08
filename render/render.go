@@ -25,6 +25,7 @@ func init() {
 type PageData struct {
 	// User is the currently logged in user, or nil if they are not logged in.
 	User *models.User
+	// Data used to render the web page.
 	Data interface{}
 }
 
@@ -40,6 +41,8 @@ func Render(w http.ResponseWriter, r *http.Request, tmpl string, data interface{
 	})
 }
 
+// renderTemplate renders a template with the provided data, and renders an error page if
+// rendering of that template fails. If THAT rendering fails, well... uh oh.
 func renderTemplate(w io.Writer, tmpl string, data interface{}) {
 	template, err := template.ParseFiles(path.Join(templatesDir, "root.tmpl"),
 		path.Join(templatesDir, "header.tmpl"),
@@ -57,8 +60,11 @@ func renderTemplate(w io.Writer, tmpl string, data interface{}) {
 // ErrorPageData is used to render an error page when an error occurs while
 // rendering a page.
 type ErrorPageData struct {
-	File  string
-	Data  string
+	// File that could not be rendered
+	File string
+	// Data that was provided to render the page
+	Data string
+	// Error explains why the page could not be rendered successfully.
 	Error string
 }
 

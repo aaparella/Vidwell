@@ -13,6 +13,7 @@ import (
 var Mutex *sync.Mutex
 var DB *gorm.DB
 
+// InitializeDatabase creates required database connections
 func InitializeDatabase(conf config.StorageConfiguration) error {
 	var err error
 	DB, err = gorm.Open("postgres", conf.Database)

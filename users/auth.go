@@ -2,6 +2,7 @@ package users
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -41,9 +42,10 @@ func CheckLoginInformation(email, password string) *models.User {
 // LoginUser writes the passed user to the session for the passed request,
 // and saves the session.
 func LoginUser(w http.ResponseWriter, r *http.Request, user *models.User) {
-	sess := session.GetSession(r)
-	sess.Values["user"] = user
-	sess.Save(r, w)
+	if err := session.StoreSessionValue("user", user, r, w); err != nil {
+		//TODO handle this properly
+		log.Println("Could not log in user : ", err)
+	}
 }
 
 // Checks that an email is valid. Clearly needs work.

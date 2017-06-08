@@ -53,14 +53,10 @@ func CreateBuckets(names ...string) error {
 		return err
 	}
 
-	check := func(name string) {
+	for _, name := range names {
 		if err == nil {
 			err = EnsureExists(name, buckets)
 		}
-	}
-
-	for _, name := range names {
-		check(name)
 	}
 
 	return err

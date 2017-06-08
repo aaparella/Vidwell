@@ -4,9 +4,13 @@ import "github.com/jinzhu/gorm"
 
 // User encapsulates information about a user account.
 type User struct {
-	AccountName   string
-	DisplayName   string
-	Email         string `gorm:"unique"`
+	// AccountName used to log into Vidwell
+	AccountName string
+	// DisplayName shown on comments and video pages
+	DisplayName string
+	// Email used to register account, must be unique.
+	Email string `gorm:"unique"`
+	// Administrator privilege indicator
 	Administrator bool
 
 	// Password is the bcrypt hashed password for this user.
@@ -19,12 +23,19 @@ type User struct {
 	gorm.Model
 }
 
+// Video encapsulates all data about a video. Actual videos
+// are stored in object store, referenced by a video's UUID
 type Video struct {
-	Title       string
-	Uuid        string
+	// Title of the video
+	Title string
+	// Uuid that can be used to fetch the actual video content
+	Uuid string
+	// ContentType indicates what format the video is in
 	ContentType string
-	Views       uint
-	UserID      uint
+	// Views tracks the number of views a video has accrued.
+	Views uint
+	// UserID of the user that created the video
+	UserID uint
 	gorm.Model
 }
 
