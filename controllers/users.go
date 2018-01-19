@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"log"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -11,6 +10,7 @@ import (
 	"github.com/aaparella/vidwell/storage"
 	"github.com/aaparella/vidwell/users"
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 // UserController consolidates behavior regarding the viewing and creation
@@ -72,7 +72,7 @@ func (uc UserController) NewUser(w http.ResponseWriter, r *http.Request) {
 
 	u.Password, _ = bcrypt.GenerateFromPassword(u.Password, 0)
 	if err := storage.DB.Create(u).Error; err != nil {
-		log.Println(w, "Could not create new user: %s", err.Error())
+		logrus.Error(w, "Could not create new user: %s", err.Error())
 		http.Error(w, "Could not create new user", http.StatusInternalServerError)
 	} else {
 		users.LoginUser(w, r, u)

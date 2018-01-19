@@ -11,7 +11,7 @@ import (
 	"github.com/aaparella/vidwell/users"
 	"github.com/aaparella/vidwell/videos"
 	"github.com/gorilla/mux"
-	"github.com/siddontang/go/log"
+	"github.com/sirupsen/logrus"
 )
 
 // VideoController contains all endpoints and webpages regarding viewing
@@ -42,7 +42,7 @@ func (vc VideoController) Endpoints() map[string]map[string]http.HandlerFunc {
 func (vc VideoController) ViewVideos(w http.ResponseWriter, r *http.Request) {
 	var videos []models.Video
 	if err := storage.DB.Find(&videos).Error; err != nil {
-		log.Error("Could not find videos : ", err.Error())
+		logrus.Error("Could not find videos : ", err.Error())
 		http.Error(w, "Error finding videos", http.StatusInternalServerError)
 		return
 	}

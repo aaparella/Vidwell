@@ -1,11 +1,11 @@
 package stats
 
 import (
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/datadog/datadog-go/statsd"
+	"github.com/sirupsen/logrus"
 )
 
 var client *statsd.Client
@@ -15,9 +15,9 @@ func init() {
 	var err error
 	client, err = statsd.New("whatever")
 	if err != nil {
-		log.Fatal("Could not connect to statsd server : ", err)
+		logrus.Fatal("Could not connect to statsd server : ", err)
 	}
-	log.Println("Statsd client initialized...")
+	logrus.Println("Statsd client initialized...")
 }
 
 func Submit() {

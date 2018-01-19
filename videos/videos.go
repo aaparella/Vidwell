@@ -1,23 +1,23 @@
 package videos
 
 import (
-	"log"
 	"net/url"
 
 	"github.com/aaparella/vidwell/models"
 	"github.com/aaparella/vidwell/storage"
 	"github.com/pborman/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 // StoreVideo is a very badly named function.
 func StoreVideo(data []byte, contentType, title string, user *models.User) {
 	name := uuid.New()
 	if err := StoreVideoObject(data, contentType, name); err != nil {
-		log.Println("Could not store video : ", err)
+		logrus.Error("Could not store video : ", err)
 		return
 	}
 	if err := CreateVideoRecord(title, name, contentType, user.ID); err != nil {
-		log.Println("Could not create video record : ", err)
+		logrus.Error("Could not create video record : ", err)
 	}
 }
 

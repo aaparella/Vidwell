@@ -2,22 +2,22 @@ package storage
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/aaparella/vidwell/config"
+	"github.com/sirupsen/logrus"
 )
 
 // Create storage client and test connection
 func init() {
-	log.Printf("Initializing data storage...")
+	logrus.Printf("Initializing data storage...")
 	conf := config.GetStorageConfiguration()
 	if err := InitializeObjectStorage(conf); err != nil {
-		log.Fatal("Error initializing storage : ", err)
+		logrus.Fatal("Error initializing storage : ", err)
 	}
 	if err := InitializeDatabase(conf); err != nil {
-		log.Fatal("Error initializaing database : ", err)
+		logrus.Fatal("Error initializaing database : ", err)
 	}
-	log.Println("Storage configured!")
+	logrus.Println("Storage configured!")
 }
 
 // Teardown is called in main when the application is closed, and closes any

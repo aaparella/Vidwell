@@ -16,6 +16,7 @@ How to Run
 
 VidWell can easily be run locally. Simply modify the config.ini file with the URL of the object storage service, and the respective keys. Also set the database url appropriately. Then the application can simply be built and run as a normal go application. The following is an example config.ini file, with the values annotated.
 
+```yaml
 [Storage]
 
 Endpoint=        # Object store endpoint 
@@ -30,3 +31,4 @@ TempaltesDir=./views # Directory containing templates
 
 [Session]
 Key=             # Key used to encrypt cookies
+```

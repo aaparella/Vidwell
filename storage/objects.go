@@ -3,12 +3,12 @@ package storage
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"net/url"
 	"time"
 
 	"github.com/aaparella/vidwell/config"
 	minio "github.com/minio/minio-go"
+	"github.com/sirupsen/logrus"
 )
 
 var client *minio.Client
@@ -92,7 +92,7 @@ func CreateBucket(name string) error {
 func GetObjectUrl(name, bucket string) *url.URL {
 	url, err := client.PresignedGetObject(bucket, name, time.Hour, nil)
 	if err != nil {
-		log.Println("Could not get URL : ", err.Error())
+		logrus.Println("Could not get URL : ", err.Error())
 		return nil
 	}
 

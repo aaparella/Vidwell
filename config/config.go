@@ -1,8 +1,7 @@
 package config
 
 import (
-	"log"
-
+	"github.com/sirupsen/logrus"
 	gcfg "gopkg.in/gcfg.v1"
 )
 
@@ -52,10 +51,10 @@ type Configuration struct {
 var conf Configuration
 
 func init() {
-	log.Println("Parsing configuration...")
+	logrus.Info("Parsing configuration...")
 	err := gcfg.ReadFileInto(&conf, "config.ini")
 	if err != nil {
-		log.Fatal("Could not read configuration : ", err)
+		logrus.Fatal("Could not read configuration : ", err)
 	}
 }
 

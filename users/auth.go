@@ -2,7 +2,6 @@ package users
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
@@ -10,6 +9,7 @@ import (
 	"github.com/aaparella/vidwell/models"
 	"github.com/aaparella/vidwell/session"
 	"github.com/aaparella/vidwell/storage"
+	"github.com/sirupsen/logrus"
 )
 
 // MustBeLoggedIn wraps another http.HandlerFunc that requires a user to be
@@ -31,9 +31,13 @@ func MustBeLoggedIn(f http.HandlerFunc) http.HandlerFunc {
 func CheckLoginInformation(email, password string) *models.User {
 	u := &models.User{}
 	if err := storage.DB.Where(&models.User{Email: email}).First(u); err != nil {
+		// Perform the comparison regardless of whether or not the user actually
+		// exists, in order to prevent timing attacks from leaking emails of
+		// users.
 		u = &models.User{Password: []byte{}}
 	}
 	if err := bcrypt.CompareHashAndPassword(u.Password, []byte(password)); err != nil {
+		logrus.Error("Could perform bcrypt hash comparison : ", err.Error())
 		return nil
 	}
 	return u
@@ -44,7 +48,7 @@ func CheckLoginInformation(email, password string) *models.User {
 func LoginUser(w http.ResponseWriter, r *http.Request, user *models.User) {
 	if err := session.StoreSessionValue("user", user, r, w); err != nil {
 		//TODO handle this properly
-		log.Println("Could not log in user : ", err)
+		logrus.Println("Could not log in user : ", err)
 	}
 }
 
